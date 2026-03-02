@@ -6,3 +6,5 @@ report_pdf/
 debug_foto_url.py
 fix_foto_url.py
 *.db
+__pycache__/
+*.docx
