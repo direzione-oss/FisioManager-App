@@ -206,24 +206,39 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
         start_y = pdf.get_y()
         photo_end_y = start_y + 30  # default per "No Foto"
         
-        # --- GESTIONE FOTO (FIX PER IMMAGINI RIPETUTE) ---
-        path_db = row['foto_path']
-        full_path = None
-        if path_db:
-            filename = os.path.basename(path_db)
-            full_path = os.path.join(FOTO_DIR, filename)
+        # --- GESTIONE FOTO (supporta file locali e URL Supabase) ---
+        path_db = row.get('foto_path') or ''
+        img_source = None
         
-        if full_path and os.path.exists(full_path):
-            safe_img = normalizza_immagine_per_pdf(full_path)
+        # 1. Prova file locale
+        if path_db and not path_db.startswith('http'):
+            filename = os.path.basename(path_db)
+            local_path = os.path.join(FOTO_DIR, filename)
+            if os.path.exists(local_path):
+                img_source = local_path
+        
+        # 2. Prova URL Supabase → scarica in temp
+        if not img_source and path_db.startswith('http'):
+            try:
+                import urllib.request, tempfile
+                from urllib.parse import unquote
+                url_filename = unquote(path_db.split('/')[-1])
+                tmp_file = os.path.join(tempfile.gettempdir(), f"pdf_{url_filename}")
+                urllib.request.urlretrieve(path_db, tmp_file)
+                img_source = tmp_file
+            except Exception:
+                img_source = None
+        
+        if img_source:
+            safe_img = normalizza_immagine_per_pdf(img_source)
             if safe_img:
                 try:
-                    # Calcola altezza reale della foto in base alle proporzioni
                     with Image.open(safe_img) as img_tmp:
                         w_px, h_px = img_tmp.size
                     photo_h = PHOTO_W * h_px / w_px
                     pdf.image(safe_img, x=10, y=start_y, w=PHOTO_W)
                     photo_end_y = start_y + photo_h
-                except:
+                except Exception:
                     pdf.set_xy(10, start_y)
                     pdf.set_font("Arial", 'B', 8)
                     pdf.set_text_color(255, 0, 0)
