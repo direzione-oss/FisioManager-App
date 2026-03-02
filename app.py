@@ -572,6 +572,14 @@ elif scelta == "🏋️ Catalogo Esercizi":
                 if es_rows.empty: raise ValueError
                 es_data = es_rows.iloc[0]
                 st.markdown(f"### ✏️ Modifica: {es_data['nome']}")
+                # --- Anteprima foto attuale ---
+                col_foto_prev, col_form = st.columns([1, 2])
+                with col_foto_prev:
+                    foto_url_attuale = get_foto_url(es_data.get('foto_path'))
+                    if foto_url_attuale:
+                        st.image(foto_url_attuale, caption="📷 Foto attuale", use_container_width=True)
+                    else:
+                        st.info("🖼️ Nessuna foto associata.")
                 with st.form("edit_es_form"):
                     e_nome = st.text_input("Nome", es_data['nome'])
                     try: d_idx = lista_distretti.index(es_data['distretto'])
@@ -582,7 +590,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                     e_r = c2.text_input("Rip", es_data['rip_std'])
                     e_rec = c3.text_input("Rec", es_data['recupero'])
                     e_desc = st.text_area("Descrizione", es_data['descrizione'])
-                    e_foto = st.file_uploader("Aggiorna Foto (opzionale)", type=['jpg', 'png'])
+                    e_foto = st.file_uploader("🔄 Sostituisci Foto (opzionale)", type=['jpg', 'png'])
                     if st.form_submit_button("💾 Salva Modifiche"):
                         new_url = es_data['foto_path']
                         if e_foto:
