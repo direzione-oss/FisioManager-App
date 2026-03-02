@@ -125,9 +125,7 @@ class PDF(FPDF):
         self.set_font('Arial', 'B', 18)
         self.set_text_color(0, 109, 119)
         self.cell(0, 10, 'Centro Medico For Me', 0, 1, 'L') 
-        self.set_font('Arial', 'I', 12)
-        self.set_text_color(100, 100, 100)
-        self.cell(0, 8, 'Scheda Riabilitativa Personalizzata', 0, 1, 'L')
+
         self.set_draw_color(0, 109, 119)
         self.set_line_width(0.5)
         self.line(10, 30, 200, 30)
@@ -194,12 +192,8 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     pdf.set_fill_color(255, 255, 255)
     pdf.ln(4)
     
-    pdf.set_font("Arial", 'B', 14)
-    pdf.set_fill_color(0, 109, 119)
-    pdf.set_text_color(255, 255, 255)
-    pdf.cell(0, 10, "  Protocollo Esercizi", ln=True, fill=True)
     pdf.set_text_color(0, 0, 0)
-    pdf.ln(5)
+    pdf.ln(3)
 
     # Layout
     PHOTO_W = 45
