@@ -661,14 +661,32 @@ elif scelta == "🏋️ Catalogo Esercizi":
                         st.image(foto_url_attuale, caption="📷 Foto attuale", use_container_width=True)
                     else:
                         st.info("🖼️ Nessuna foto associata.")
-                    # Fotocamera diretta (fuori dal form)
-                    camera_foto = st.camera_input("📸 Scatta foto", key=f"cam_{es_id}")
-                    if camera_foto:
-                        if st.button("✅ Usa questa foto", key=f"use_cam_{es_id}", type="primary"):
-                            new_url = upload_foto(es_data['nome'], camera_foto.getvalue())
+                    # Fotocamera posteriore (su mobile apre la cam dietro)
+                    st.markdown("**📸 Scatta / Carica foto:**")
+                    nuova_foto = st.file_uploader("Scegli o scatta foto", type=['jpg', 'png', 'jpeg'], key=f"foto_upload_{es_id}", label_visibility="collapsed")
+                    if nuova_foto:
+                        if st.button("✅ Usa questa foto", key=f"use_foto_{es_id}", type="primary"):
+                            new_url = upload_foto(es_data['nome'], nuova_foto.getvalue())
                             update("esercizi", {"foto_path": new_url}, "id", es_id)
-                            _log("Foto da Camera", f"Esercizio ID: {es_id}")
+                            _log("Foto Caricata", f"Esercizio ID: {es_id}")
                             st.success("Foto aggiornata!")
+                            st.rerun()
+                    # Upload video
+                    st.markdown("**🎬 Registra / Carica video:**")
+                    nuovo_video = st.file_uploader("Scegli o registra video", type=['mp4', 'mov', 'avi'], key=f"video_upload_{es_id}", label_visibility="collapsed")
+                    if nuovo_video:
+                        if st.button("✅ Carica video", key=f"use_video_{es_id}", type="primary"):
+                            video_filename = f"{es_data['nome'].replace(' ', '_')}_{es_id}.mp4"
+                            sb = get_supabase()
+                            sb.storage.from_("foto-esercizi").upload(
+                                f"video/{video_filename}",
+                                nuovo_video.getvalue(),
+                                {"content-type": nuovo_video.type, "upsert": "true"}
+                            )
+                            video_public_url = sb.storage.from_("foto-esercizi").get_public_url(f"video/{video_filename}")
+                            update("esercizi", {"video_url": video_public_url}, "id", es_id)
+                            _log("Video Caricato", f"Esercizio ID: {es_id}")
+                            st.success("Video caricato e QR code aggiornato!")
                             st.rerun()
                 with st.form("edit_es_form"):
                     e_nome = st.text_input("Nome", es_data['nome'])
