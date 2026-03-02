@@ -128,8 +128,8 @@ class PDF(FPDF):
 
         self.set_draw_color(0, 109, 119)
         self.set_line_width(0.5)
-        self.line(10, 30, 200, 30)
-        self.ln(12)
+        self.line(10, 20, 200, 20)
+        self.ln(5)
     def footer(self):
         self.set_y(-15)
         self.set_font('Arial', 'I', 8)
@@ -160,25 +160,22 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     pdf.set_auto_page_break(auto=False)
     pdf.add_page()
     
-    # Intestazione
+    # Intestazione paziente compatta
     pdf.set_fill_color(245, 245, 245)
-    pdf.rect(10, pdf.get_y(), 190, 25, 'F')
+    pdf.rect(10, pdf.get_y(), 190, 18, 'F')
     pdf.set_xy(12, pdf.get_y()+2)
-    pdf.set_font("Arial", 'B', 12)
-    pdf.set_text_color(0, 0, 0)
-    pdf.cell(100, 7, f"Paziente: {paziente['nome_completo']}", ln=0)
-    pdf.cell(85, 7, f"Fisioterapista: {nome_fisio}", ln=1, align='R')
-    pdf.set_x(12)
-    pdf.set_font("Arial", size=11)
-    pdf.cell(100, 7, f"Data Nascita: {paziente['data_nascita']}", ln=0)
-    pdf.cell(85, 7, f"Data Scheda: {data_report.strftime('%d/%m/%Y')}", ln=1, align='R')
-    
-    pdf.ln(3)
-    # Box grigio per Diagnosi / Obiettivi
-    pdf.set_fill_color(245, 245, 245)
     pdf.set_font("Arial", 'B', 11)
-    pdf.set_text_color(0, 109, 119)
-    pdf.cell(0, 7, "  Diagnosi / Obiettivi:", ln=True, fill=True)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(100, 6, f"Paziente: {paziente['nome_completo']}", ln=0)
+    pdf.cell(85, 6, f"Fisioterapista: {nome_fisio}", ln=1, align='R')
+    pdf.set_x(12)
+    pdf.set_font("Arial", size=10)
+    pdf.cell(100, 6, f"Data Nascita: {paziente['data_nascita']}", ln=0)
+    pdf.cell(85, 6, f"Data Scheda: {data_report.strftime('%d/%m/%Y')}", ln=1, align='R')
+    
+    pdf.ln(2)
+    # Diagnosi inline (label e testo sulla stessa riga)
+    pdf.set_fill_color(245, 245, 245)
     pdf.set_font("Arial", '', 10)
     pdf.set_text_color(0, 0, 0)
     try:
@@ -186,11 +183,10 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
         diag_txt = diag_txt.encode('latin-1', 'replace').decode('latin-1')
     except:
         diag_txt = str(paziente.get('diagnosi', '-'))
-    pdf.multi_cell(0, 5, "  " + diag_txt, border=0, fill=True)
-    # Padding inferiore box
-    pdf.cell(0, 3, "", fill=True, ln=True)
+    pdf.multi_cell(0, 6, f"Diagnosi / Obiettivi:  {diag_txt}", border=0, fill=True)
+    pdf.cell(0, 2, "", fill=True, ln=True)
     pdf.set_fill_color(255, 255, 255)
-    pdf.ln(4)
+    pdf.ln(3)
     
     pdf.set_text_color(0, 0, 0)
     pdf.ln(3)
@@ -200,7 +196,7 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     TEXT_X_START = 60
     TEXT_W = 140
     PAGE_LIMIT_Y = 270
-    MIN_ROW_H = 65
+    MIN_ROW_H = 60
 
     for _, row in esercizi_df.iterrows():
         if pdf.get_y() + MIN_ROW_H > PAGE_LIMIT_Y:
