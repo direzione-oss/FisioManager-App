@@ -620,7 +620,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                     st.session_state.edit_esercizio_id = None
                     st.rerun()
                 st.divider()
-            except: st.session_state.edit_esercizio_id = None
+            except Exception: st.session_state.edit_esercizio_id = None
 
         if not df_es.empty:
             for _, row in df_es.iterrows():
