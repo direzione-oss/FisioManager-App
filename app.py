@@ -571,6 +571,22 @@ elif scelta == "🏋️ Catalogo Esercizi":
                 es_rows = query_df_filter("esercizi", "id", es_id)
                 if es_rows.empty: raise ValueError
                 es_data = es_rows.iloc[0]
+                # --- Navigazione tra esercizi ---
+                ids_list = [int(x) for x in df_es['id'].tolist()]
+                es_id_int = int(es_id)
+                try: curr_idx = ids_list.index(es_id_int)
+                except ValueError: curr_idx = 0
+                total = len(ids_list)
+                nav_l, nav_info, nav_r = st.columns([1, 2, 1])
+                if curr_idx > 0:
+                    if nav_l.button("◀ Precedente", key="nav_prev_es"):
+                        st.session_state.edit_esercizio_id = ids_list[curr_idx - 1]
+                        st.rerun()
+                nav_info.markdown(f"<p style='text-align:center;margin-top:8px'><b>{curr_idx+1} / {total}</b></p>", unsafe_allow_html=True)
+                if curr_idx < total - 1:
+                    if nav_r.button("Successivo ▶", key="nav_next_es"):
+                        st.session_state.edit_esercizio_id = ids_list[curr_idx + 1]
+                        st.rerun()
                 st.markdown(f"### ✏️ Modifica: {es_data['nome']}")
                 # --- Anteprima foto attuale ---
                 col_foto_prev, col_form = st.columns([1, 2])
@@ -600,7 +616,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                         st.session_state.edit_esercizio_id = None
                         st.success("Aggiornato!")
                         st.rerun()
-                if st.button("Annulla Modifica"):
+                if st.button("✖ Chiudi Modifica", key="close_edit_es"):
                     st.session_state.edit_esercizio_id = None
                     st.rerun()
                 st.divider()
