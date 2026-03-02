@@ -639,7 +639,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                         st.session_state.edit_esercizio_id = ids_list[curr_idx + 1]
                         st.rerun()
                 st.markdown(f"### ✏️ Modifica: {es_data['nome']}")
-                # --- Anteprima foto attuale ---
+                # --- Anteprima foto attuale + fotocamera ---
                 col_foto_prev, col_form = st.columns([1, 2])
                 with col_foto_prev:
                     foto_url_attuale = get_foto_url(es_data.get('foto_path'))
@@ -647,6 +647,15 @@ elif scelta == "🏋️ Catalogo Esercizi":
                         st.image(foto_url_attuale, caption="📷 Foto attuale", use_container_width=True)
                     else:
                         st.info("🖼️ Nessuna foto associata.")
+                    # Fotocamera diretta (fuori dal form)
+                    camera_foto = st.camera_input("📸 Scatta foto", key=f"cam_{es_id}")
+                    if camera_foto:
+                        if st.button("✅ Usa questa foto", key=f"use_cam_{es_id}", type="primary"):
+                            new_url = upload_foto(es_data['nome'], camera_foto.getvalue())
+                            update("esercizi", {"foto_path": new_url}, "id", es_id)
+                            _log("Foto da Camera", f"Esercizio ID: {es_id}")
+                            st.success("Foto aggiornata!")
+                            st.rerun()
                 with st.form("edit_es_form"):
                     e_nome = st.text_input("Nome", es_data['nome'])
                     try: d_idx = lista_distretti.index(es_data['distretto'])
