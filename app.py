@@ -204,6 +204,7 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             pdf.ln(5)
 
         start_y = pdf.get_y()
+        photo_end_y = start_y + 30  # default per "No Foto"
         
         # --- GESTIONE FOTO (FIX PER IMMAGINI RIPETUTE) ---
         path_db = row['foto_path']
@@ -213,12 +214,15 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             full_path = os.path.join(FOTO_DIR, filename)
         
         if full_path and os.path.exists(full_path):
-            # Usa SEMPRE la normalizzazione per creare un temp univoco
-            # Questo impedisce a FPDF di fare caching errato
             safe_img = normalizza_immagine_per_pdf(full_path)
             if safe_img:
                 try:
+                    # Calcola altezza reale della foto in base alle proporzioni
+                    with Image.open(safe_img) as img_tmp:
+                        w_px, h_px = img_tmp.size
+                    photo_h = PHOTO_W * h_px / w_px
                     pdf.image(safe_img, x=10, y=start_y, w=PHOTO_W)
+                    photo_end_y = start_y + photo_h
                 except:
                     pdf.set_xy(10, start_y)
                     pdf.set_font("Arial", 'B', 8)
@@ -269,14 +273,13 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             pdf.multi_cell(TEXT_W, 5, f"NOTA: {note_clean}", align='L')
             pdf.set_text_color(0, 0, 0)
 
-        # --- SPAZIATURA ---
+        # --- SPAZIATURA (linea sempre sotto la foto) ---
         text_end_y = pdf.get_y()
-        min_end_y = start_y + MIN_ROW_H
-        final_y = max(text_end_y, min_end_y)
+        final_y = max(text_end_y, photo_end_y) + 3
         
         pdf.set_draw_color(220, 220, 220)
         pdf.line(10, final_y, 200, final_y)
-        pdf.set_y(final_y + 5)
+        pdf.set_y(final_y + 4)
 
     filename = f"Scheda_{paziente['nome_completo'].replace(' ', '_')}_{data_report}.pdf"
     path = os.path.join(PDF_DIR, filename)
