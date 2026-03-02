@@ -395,20 +395,6 @@ with st.sidebar:
         with open(percorso_pdf, "rb") as pdf_file:
             st.download_button("📘 Scarica Manuale", data=pdf_file, file_name="ManualeUtente.pdf", mime="application/pdf", key="btn_manuale_sidebar")
     else: st.caption("Manuale non trovato.")
-    # QR Code accesso rapido da telefono
-    if HAS_QRCODE:
-        import io
-        app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
-        qr = qrcode.QRCode(version=1, box_size=6, border=1)
-        qr.add_data(app_url)
-        qr.make(fit=True)
-        qr_img = qr.make_image(fill_color="#006D77", back_color="white")
-        buf = io.BytesIO()
-        qr_img.save(buf, format='PNG')
-        st.markdown("---")
-        st.markdown("**📱 Accesso da telefono**")
-        st.image(buf.getvalue(), use_container_width=True)
-        st.caption("Scansiona per aprire l'app")
 
 if scelta != st.session_state.pagina_attiva:
     st.session_state.pagina_attiva = scelta
@@ -416,6 +402,18 @@ if scelta != st.session_state.pagina_attiva:
     st.rerun()
 
 st.markdown('<div class="main-title">Centro Medico For Me</div>', unsafe_allow_html=True)
+# QR code accesso rapido sotto il titolo
+if HAS_QRCODE:
+    import io, base64
+    app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
+    qr = qrcode.QRCode(version=1, box_size=4, border=1)
+    qr.add_data(app_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#006D77", back_color="white")
+    buf = io.BytesIO()
+    qr_img.save(buf, format='PNG')
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    st.markdown(f'<div style="text-align:center"><img src="data:image/png;base64,{b64}" width="120"><br><span style="font-size:11px;color:#888">📱 Scansiona per accedere da telefono</span></div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # =======================================================
