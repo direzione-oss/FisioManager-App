@@ -252,9 +252,10 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
                         # Immagine più alta: limita per altezza
                         img_h = PHOTO_H
                         img_w = PHOTO_H * ratio
-                    # Centra verticalmente nello spazio
+                    # Centra nello spazio (orizzontale e verticale)
+                    img_x = 10 + (PHOTO_W - img_w) / 2
                     img_y = start_y + (PHOTO_H - img_h) / 2
-                    pdf.image(safe_img, x=10, y=img_y, w=img_w, h=img_h)
+                    pdf.image(safe_img, x=img_x, y=img_y, w=img_w, h=img_h)
                 except Exception:
                     pdf.set_xy(10, start_y)
                     pdf.set_font("Arial", 'B', 8)
