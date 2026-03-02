@@ -192,19 +192,19 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     pdf.ln(3)
 
     # Layout
-    PHOTO_W = 58
-    TEXT_X_START = 72
-    TEXT_W = 128
+    PHOTO_W = 55
+    PHOTO_H = 50
+    ROW_H = 58
+    TEXT_X_START = 70
+    TEXT_W = 130
     PAGE_LIMIT_Y = 270
-    MIN_ROW_H = 67
 
     for _, row in esercizi_df.iterrows():
-        if pdf.get_y() + MIN_ROW_H > PAGE_LIMIT_Y:
+        if pdf.get_y() + ROW_H > PAGE_LIMIT_Y:
             pdf.add_page()
             pdf.ln(5)
 
         start_y = pdf.get_y()
-        photo_end_y = start_y + 30  # default per "No Foto"
         
         # --- GESTIONE FOTO (supporta file locali e URL Supabase) ---
         path_db = row.get('foto_path') or ''
@@ -233,26 +233,22 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             safe_img = normalizza_immagine_per_pdf(img_source)
             if safe_img:
                 try:
-                    with Image.open(safe_img) as img_tmp:
-                        w_px, h_px = img_tmp.size
-                    photo_h = PHOTO_W * h_px / w_px
-                    pdf.image(safe_img, x=10, y=start_y, w=PHOTO_W)
-                    photo_end_y = start_y + photo_h
+                    pdf.image(safe_img, x=10, y=start_y, w=PHOTO_W, h=PHOTO_H)
                 except Exception:
                     pdf.set_xy(10, start_y)
                     pdf.set_font("Arial", 'B', 8)
                     pdf.set_text_color(255, 0, 0)
-                    pdf.cell(PHOTO_W, 30, "ERR FORMATO", border=1, align='C')
+                    pdf.cell(PHOTO_W, PHOTO_H, "ERR FORMATO", border=1, align='C')
             else:
                  pdf.set_xy(10, start_y)
                  pdf.set_font("Arial", 'B', 8)
                  pdf.set_text_color(255, 0, 0)
-                 pdf.cell(PHOTO_W, 30, "ERR CONV", border=1, align='C')
+                 pdf.cell(PHOTO_W, PHOTO_H, "ERR CONV", border=1, align='C')
         else:
             pdf.set_xy(10, start_y)
             pdf.set_font("Arial", 'I', 8)
             pdf.set_text_color(200,200,200)
-            pdf.cell(PHOTO_W, 30, "No Foto", border=1, align='C')
+            pdf.cell(PHOTO_W, PHOTO_H, "No Foto", border=1, align='C')
 
         # --- TESTO ---
         pdf.set_xy(TEXT_X_START, start_y)
@@ -288,13 +284,12 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             pdf.multi_cell(TEXT_W, 5, f"NOTA: {note_clean}", align='L')
             pdf.set_text_color(0, 0, 0)
 
-        # --- SPAZIATURA (linea sempre sotto la foto) ---
-        text_end_y = pdf.get_y()
-        final_y = max(text_end_y, photo_end_y) + 3
+        # --- SPAZIATURA FISSA ---
+        final_y = start_y + ROW_H
         
         pdf.set_draw_color(220, 220, 220)
         pdf.line(10, final_y, 200, final_y)
-        pdf.set_y(final_y + 4)
+        pdf.set_y(final_y + 2)
 
     filename = f"Scheda_{paziente['nome_completo'].replace(' ', '_')}_{data_report}.pdf"
     path = os.path.join(PDF_DIR, filename)
