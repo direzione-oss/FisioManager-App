@@ -175,16 +175,24 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     pdf.cell(100, 7, f"Data Nascita: {paziente['data_nascita']}", ln=0)
     pdf.cell(85, 7, f"Data Scheda: {data_report.strftime('%d/%m/%Y')}", ln=1, align='R')
     
-    pdf.ln(5)
+    pdf.ln(3)
+    # Box grigio per Diagnosi / Obiettivi
+    pdf.set_fill_color(245, 245, 245)
     pdf.set_font("Arial", 'B', 11)
     pdf.set_text_color(0, 109, 119)
-    pdf.cell(0, 6, "Diagnosi / Obiettivi:", ln=True)
+    pdf.cell(0, 7, "  Diagnosi / Obiettivi:", ln=True, fill=True)
     pdf.set_font("Arial", '', 10)
     pdf.set_text_color(0, 0, 0)
-    try: diag_txt = paziente['diagnosi'].encode('latin-1', 'replace').decode('latin-1')
-    except: diag_txt = paziente['diagnosi']
-    pdf.multi_cell(0, 5, diag_txt, border=0)
-    pdf.ln(6)
+    try:
+        diag_txt = paziente.get('diagnosi') or '-'
+        diag_txt = diag_txt.encode('latin-1', 'replace').decode('latin-1')
+    except:
+        diag_txt = str(paziente.get('diagnosi', '-'))
+    pdf.multi_cell(0, 5, "  " + diag_txt, border=0, fill=True)
+    # Padding inferiore box
+    pdf.cell(0, 3, "", fill=True, ln=True)
+    pdf.set_fill_color(255, 255, 255)
+    pdf.ln(4)
     
     pdf.set_font("Arial", 'B', 14)
     pdf.set_fill_color(0, 109, 119)
