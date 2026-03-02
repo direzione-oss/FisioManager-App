@@ -2,9 +2,15 @@ import streamlit as st
 import os
 import pandas as pd
 import altair as alt
+import tempfile
 from datetime import datetime, date, timedelta
 from fpdf import FPDF
 from PIL import Image
+try:
+    import qrcode
+    HAS_QRCODE = True
+except ImportError:
+    HAS_QRCODE = False
 from db_supabase import (
     get_supabase, query_df_raw, query_df_filter,
     insert, update, delete, delete_filter, registra_log,
@@ -249,6 +255,28 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             pdf.set_font("Arial", 'I', 8)
             pdf.set_text_color(200,200,200)
             pdf.cell(PHOTO_W, PHOTO_H, "No Foto", border=1, align='C')
+
+        # --- QR CODE VIDEO (sotto la foto) ---
+        video_url = row.get('video_url') or ''
+        if video_url and HAS_QRCODE:
+            try:
+                QR_SIZE = 18
+                qr = qrcode.QRCode(version=1, box_size=6, border=1)
+                qr.add_data(video_url)
+                qr.make(fit=True)
+                qr_img = qr.make_image(fill_color="black", back_color="white")
+                qr_path = os.path.join(tempfile.gettempdir(), f"qr_{row['id']}.png")
+                qr_img.save(qr_path)
+                # Posiziona QR centrato sotto la foto
+                qr_x = 10 + (PHOTO_W - QR_SIZE) / 2
+                qr_y = start_y + PHOTO_H + 1
+                pdf.image(qr_path, x=qr_x, y=qr_y, w=QR_SIZE, h=QR_SIZE)
+                pdf.set_xy(10, qr_y + QR_SIZE)
+                pdf.set_font("Arial", 'I', 6)
+                pdf.set_text_color(100, 100, 100)
+                pdf.cell(PHOTO_W, 3, "Video esercizio", align='C')
+            except Exception:
+                pass
 
         # --- TESTO ---
         pdf.set_xy(TEXT_X_START, start_y)
@@ -554,12 +582,13 @@ elif scelta == "🏋️ Catalogo Esercizi":
             c1, c2, c3 = st.columns(3)
             s, r, rec = c1.text_input("Serie Std"), c2.text_input("Rip Std"), c3.text_input("Rec Std")
             desc = st.text_area("Descrizione")
+            video_url = st.text_input("🎬 Link Video YouTube (opzionale)", placeholder="https://youtu.be/...")
             foto = st.file_uploader("Foto", type=['jpg', 'png'])
             if st.form_submit_button("Salva Esercizio"):
                 foto_url = ""
                 if foto:
                     foto_url = upload_foto(nome_es, foto.getvalue())
-                insert("esercizi", {"nome": nome_es, "distretto": dist, "descrizione": desc, "foto_path": foto_url, "serie_std": s, "rip_std": r, "recupero": rec})
+                insert("esercizi", {"nome": nome_es, "distretto": dist, "descrizione": desc, "foto_path": foto_url, "serie_std": s, "rip_std": r, "recupero": rec, "video_url": video_url or None})
                 _log("Nuovo Esercizio", f"Nome: {nome_es}")
                 st.success("Esercizio creato!")
     with t_v:
@@ -612,12 +641,13 @@ elif scelta == "🏋️ Catalogo Esercizi":
                     e_r = c2.text_input("Rip", es_data['rip_std'])
                     e_rec = c3.text_input("Rec", es_data['recupero'])
                     e_desc = st.text_area("Descrizione", es_data['descrizione'])
+                    e_video = st.text_input("🎬 Link Video YouTube", value=es_data.get('video_url') or '', placeholder="https://youtu.be/...")
                     e_foto = st.file_uploader("🔄 Sostituisci Foto (opzionale)", type=['jpg', 'png'])
                     if st.form_submit_button("💾 Salva Modifiche"):
                         new_url = es_data['foto_path']
                         if e_foto:
                             new_url = upload_foto(e_nome, e_foto.getvalue())
-                        update("esercizi", {"nome": e_nome, "distretto": e_dist, "descrizione": e_desc, "serie_std": e_s, "rip_std": e_r, "recupero": e_rec, "foto_path": new_url}, "id", es_id)
+                        update("esercizi", {"nome": e_nome, "distretto": e_dist, "descrizione": e_desc, "serie_std": e_s, "rip_std": e_r, "recupero": e_rec, "foto_path": new_url, "video_url": e_video or None}, "id", es_id)
                         _log("Modifica Esercizio", f"ID: {es_id}")
                         st.session_state.edit_esercizio_id = None
                         st.success("Aggiornato!")

@@ -4,3 +4,4 @@ altair
 fpdf
 Pillow
 supabase
+qrcode
