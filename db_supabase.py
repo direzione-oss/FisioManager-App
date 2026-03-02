@@ -4,6 +4,7 @@ Sostituisce sqlite3 con chiamate alle API di Supabase.
 """
 import streamlit as st
 import pandas as pd
+from typing import Optional
 from supabase import create_client, Client
 from datetime import datetime
 
@@ -196,7 +197,7 @@ def upload_foto(nome_esercizio: str, file_bytes: bytes, mime: str = "image/jpeg"
     return url
 
 
-def get_foto_url(foto_path: str) -> str | None:
+def get_foto_url(foto_path: str) -> Optional[str]:
     """
     Dato il valore foto_path salvato nel DB, restituisce un URL utilizzabile.
     Compatibile sia con i vecchi path locali (ignorati) che con gli URL Supabase.
