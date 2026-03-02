@@ -256,25 +256,25 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             pdf.set_text_color(200,200,200)
             pdf.cell(PHOTO_W, PHOTO_H, "No Foto", border=1, align='C')
 
-        # --- QR CODE VIDEO (sotto la foto) ---
+        # --- QR CODE VIDEO (in basso, sotto la foto) ---
         video_url = row.get('video_url') or ''
         if video_url and HAS_QRCODE:
             try:
-                QR_SIZE = 18
-                qr = qrcode.QRCode(version=1, box_size=6, border=1)
+                QR_SIZE = 15
+                qr = qrcode.QRCode(version=1, box_size=5, border=1)
                 qr.add_data(video_url)
                 qr.make(fit=True)
                 qr_img = qr.make_image(fill_color="black", back_color="white")
                 qr_path = os.path.join(tempfile.gettempdir(), f"qr_{row['id']}.png")
                 qr_img.save(qr_path)
-                # Posiziona QR centrato sotto la foto
-                qr_x = 10 + (PHOTO_W - QR_SIZE) / 2
-                qr_y = start_y + PHOTO_H + 1
+                # Posiziona QR a destra della foto
+                qr_x = 10 + PHOTO_W + 2
+                qr_y = start_y + PHOTO_H - QR_SIZE
                 pdf.image(qr_path, x=qr_x, y=qr_y, w=QR_SIZE, h=QR_SIZE)
-                pdf.set_xy(10, qr_y + QR_SIZE)
-                pdf.set_font("Arial", 'I', 6)
+                pdf.set_xy(qr_x, qr_y + QR_SIZE)
+                pdf.set_font("Arial", 'I', 5)
                 pdf.set_text_color(100, 100, 100)
-                pdf.cell(PHOTO_W, 3, "Video esercizio", align='C')
+                pdf.cell(QR_SIZE, 3, "Video", align='C')
             except Exception:
                 pass
 

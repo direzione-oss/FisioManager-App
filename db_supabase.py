@@ -111,12 +111,12 @@ def get_scheda_paziente(paziente_id: int) -> pd.DataFrame:
     """Restituisce la scheda esercizi di un paziente con dettagli esercizio."""
     schede = query_df_filter("schede_pazienti", "paziente_id", paziente_id)
     if schede.empty:
-        return pd.DataFrame(columns=["id","ordine","nome","serie","rip","recupero","note","foto_path","descrizione"])
+        return pd.DataFrame(columns=["id","ordine","nome","serie","rip","recupero","note","foto_path","descrizione","video_url"])
     esercizi = query_df_raw("esercizi")
     if esercizi.empty:
         return pd.DataFrame()
     merged = schede.merge(
-        esercizi[["id","nome","foto_path","descrizione"]],
+        esercizi[["id","nome","foto_path","descrizione","video_url"]],
         left_on="esercizio_id", right_on="id", suffixes=("","_es")
     )
     merged = merged.rename(columns={"id": "id"})
