@@ -23,9 +23,12 @@ FOTO_DIR = os.path.join(BASE_DIR, "foto")
 PDF_DIR = os.path.join(BASE_DIR, "report_pdf")
 DB_FILE = os.path.join(BASE_DIR, "centro_fisioterapia.db")
 
-# Creazione cartelle se non esistono
-if not os.path.exists(FOTO_DIR): os.makedirs(FOTO_DIR)
-if not os.path.exists(PDF_DIR): os.makedirs(PDF_DIR)
+# Creazione cartelle se non esistono (solo locale, può fallire su cloud)
+try:
+    if not os.path.exists(FOTO_DIR): os.makedirs(FOTO_DIR)
+    if not os.path.exists(PDF_DIR): os.makedirs(PDF_DIR)
+except Exception:
+    pass
 
 # --- 🔐 GESTIONE SICUREZZA ---
 UTENTI = {
