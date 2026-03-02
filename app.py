@@ -108,20 +108,6 @@ def check_login():
                 else: st.error("Credenziali non valide.")
         
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # QR Code per accesso rapido
-        if HAS_QRCODE:
-            import io
-            app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
-            qr = qrcode.QRCode(version=1, box_size=8, border=2)
-            qr.add_data(app_url)
-            qr.make(fit=True)
-            qr_img = qr.make_image(fill_color="#006D77", back_color="white")
-            buf = io.BytesIO()
-            qr_img.save(buf, format='PNG')
-            st.markdown("<p style='text-align:center;color:#666;margin-bottom:5px'><b>📱 Scansiona per accedere dall'app</b></p>", unsafe_allow_html=True)
-            st.image(buf.getvalue(), use_container_width=False, width=200)
-        
         img_info = os.path.join(BASE_DIR, "infografica.png")
         if os.path.exists(img_info): st.image(img_info, use_container_width=True)
 
@@ -409,6 +395,20 @@ with st.sidebar:
         with open(percorso_pdf, "rb") as pdf_file:
             st.download_button("📘 Scarica Manuale", data=pdf_file, file_name="ManualeUtente.pdf", mime="application/pdf", key="btn_manuale_sidebar")
     else: st.caption("Manuale non trovato.")
+    # QR Code accesso rapido da telefono
+    if HAS_QRCODE:
+        import io
+        app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
+        qr = qrcode.QRCode(version=1, box_size=6, border=1)
+        qr.add_data(app_url)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="#006D77", back_color="white")
+        buf = io.BytesIO()
+        qr_img.save(buf, format='PNG')
+        st.markdown("---")
+        st.markdown("**📱 Accesso da telefono**")
+        st.image(buf.getvalue(), use_container_width=True)
+        st.caption("Scansiona per aprire l'app")
 
 if scelta != st.session_state.pagina_attiva:
     st.session_state.pagina_attiva = scelta
