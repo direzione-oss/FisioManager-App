@@ -239,7 +239,22 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
             safe_img = normalizza_immagine_per_pdf(img_source)
             if safe_img:
                 try:
-                    pdf.image(safe_img, x=10, y=start_y, w=PHOTO_W, h=PHOTO_H)
+                    # Calcola dimensioni proporzionali nel box PHOTO_W x PHOTO_H
+                    with Image.open(safe_img) as img_tmp:
+                        w_px, h_px = img_tmp.size
+                    ratio = w_px / h_px
+                    # Adatta al box mantenendo proporzioni
+                    if ratio >= (PHOTO_W / PHOTO_H):
+                        # Immagine più larga: limita per larghezza
+                        img_w = PHOTO_W
+                        img_h = PHOTO_W / ratio
+                    else:
+                        # Immagine più alta: limita per altezza
+                        img_h = PHOTO_H
+                        img_w = PHOTO_H * ratio
+                    # Centra verticalmente nello spazio
+                    img_y = start_y + (PHOTO_H - img_h) / 2
+                    pdf.image(safe_img, x=10, y=img_y, w=img_w, h=img_h)
                 except Exception:
                     pdf.set_xy(10, start_y)
                     pdf.set_font("Arial", 'B', 8)
