@@ -379,6 +379,18 @@ with st.sidebar:
     img_logo = os.path.join(BASE_DIR, "Immagine1.png")
     if os.path.exists(img_logo): st.image(img_logo, use_container_width=True)
     else: st.title("Centro Medico For Me")
+    # QR code accesso rapido
+    if HAS_QRCODE:
+        import io, base64
+        app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
+        qr = qrcode.QRCode(version=1, box_size=3, border=1)
+        qr.add_data(app_url)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="#006D77", back_color="white")
+        buf = io.BytesIO()
+        qr_img.save(buf, format='PNG')
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        st.markdown(f'<div style="text-align:center;margin:-5px 0 5px"><img src="data:image/png;base64,{b64}" width="90"><br><span style="font-size:9px;color:#999">📱 Accesso telefono</span></div>', unsafe_allow_html=True)
     
     st.write(f"👤 **{st.session_state.username}**") 
     if st.button("Esci / Logout"):
@@ -402,18 +414,6 @@ if scelta != st.session_state.pagina_attiva:
     st.rerun()
 
 st.markdown('<div class="main-title">Centro Medico For Me</div>', unsafe_allow_html=True)
-# QR code accesso rapido sotto il titolo
-if HAS_QRCODE:
-    import io, base64
-    app_url = "https://fisiomanager-app-uwlds5nytmqvq4xzsyzdvh.streamlit.app/"
-    qr = qrcode.QRCode(version=1, box_size=4, border=1)
-    qr.add_data(app_url)
-    qr.make(fit=True)
-    qr_img = qr.make_image(fill_color="#006D77", back_color="white")
-    buf = io.BytesIO()
-    qr_img.save(buf, format='PNG')
-    b64 = base64.b64encode(buf.getvalue()).decode()
-    st.markdown(f'<div style="text-align:center"><img src="data:image/png;base64,{b64}" width="120"><br><span style="font-size:11px;color:#888">📱 Scansiona per accedere da telefono</span></div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # =======================================================
