@@ -257,8 +257,11 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
         pdf.set_font("Arial", 'B', 10)
         pdf.set_text_color(0, 0, 0)
         pdf.set_fill_color(230, 240, 240)
-        params = f"SERIE: {row['serie']}  |  RIP: {row['rip']}  |  REC: {row['recupero']}"
-        pdf.cell(TEXT_W, 7, params, ln=True, fill=True, align='L')
+        pdf.cell(TEXT_W, 6, f"  Serie: {row['serie']}", ln=True, fill=True)
+        pdf.set_x(TEXT_X_START)
+        pdf.cell(TEXT_W, 6, f"  Ripetizioni: {row['rip']}", ln=True, fill=True)
+        pdf.set_x(TEXT_X_START)
+        pdf.cell(TEXT_W, 6, f"  Recupero: {row['recupero']}", ln=True, fill=True)
         
         pdf.set_x(TEXT_X_START)
         pdf.set_font("Arial", '', 10)
