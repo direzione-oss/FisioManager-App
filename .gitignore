@@ -1,0 +1,8 @@
+﻿.streamlit/secrets.toml
+centro_fisioterapia.db
+foto/
+nuove_foto/
+report_pdf/
+debug_foto_url.py
+fix_foto_url.py
+*.db
