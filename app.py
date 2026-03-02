@@ -192,11 +192,11 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
     pdf.ln(3)
 
     # Layout
-    PHOTO_W = 45
-    TEXT_X_START = 60
-    TEXT_W = 140
+    PHOTO_W = 58
+    TEXT_X_START = 72
+    TEXT_W = 128
     PAGE_LIMIT_Y = 270
-    MIN_ROW_H = 60
+    MIN_ROW_H = 67
 
     for _, row in esercizi_df.iterrows():
         if pdf.get_y() + MIN_ROW_H > PAGE_LIMIT_Y:
