@@ -197,6 +197,29 @@ def upload_foto(nome_esercizio: str, file_bytes: bytes, mime: str = "image/jpeg"
     return url
 
 
+REPORT_PREFIX = "reports"
+
+
+def upload_pdf(nome_file: str, file_bytes: bytes) -> str:
+    """
+    Carica un PDF su Supabase Storage (bucket foto-esercizi/reports/).
+    Restituisce l'URL pubblico da salvare nel DB.
+    """
+    sb = get_supabase()
+    storage_path = f"{REPORT_PREFIX}/{nome_file}"
+    try:
+        sb.storage.from_(BUCKET).remove([storage_path])
+    except Exception:
+        pass
+    sb.storage.from_(BUCKET).upload(
+        storage_path,
+        file_bytes,
+        {"content-type": "application/pdf", "upsert": "true"}
+    )
+    url = sb.storage.from_(BUCKET).get_public_url(storage_path)
+    return url
+
+
 def get_foto_url(foto_path: str) -> Optional[str]:
     """
     Dato il valore foto_path salvato nel DB, restituisce un URL utilizzabile.

@@ -17,7 +17,7 @@ from db_supabase import (
     get_scheda_paziente, get_distribuzione_distretti,
     get_trend_iscrizioni, get_pazienti_in_scadenza,
     get_protocollo_esercizi, get_report_esercizi,
-    upload_foto, get_foto_url
+    upload_foto, get_foto_url, upload_pdf
 )
 
 # --- 1. CONFIGURAZIONE E PERCORSI ASSOLUTI ---
@@ -931,7 +931,9 @@ elif scelta == "📑 Report & Storico":
                     if not nome_fisio: st.error("Seleziona un Fisioterapista!")
                     else:
                         nome_file, path_file = genera_pdf_fisico(paz, df_rep, rep_date, nome_fisio)
-                        insert("storico_report", {"paziente_id": int(paz['id']), "data_creazione": str(rep_date), "nome_file": nome_file, "path_file": path_file, "fisioterapista": nome_fisio})
+                        with open(path_file, "rb") as pdf_f:
+                            pdf_url = upload_pdf(nome_file, pdf_f.read())
+                        insert("storico_report", {"paziente_id": int(paz['id']), "data_creazione": str(rep_date), "nome_file": nome_file, "path_file": pdf_url, "fisioterapista": nome_fisio})
                         _log("Creazione Report PDF", f"Paziente: {paz['nome_completo']}")
                         st.success(f"PDF Salvato: {nome_file}")
                         st.rerun()
@@ -959,10 +961,19 @@ elif scelta == "📑 Report & Storico":
                     c1.write(f"📅 {pdf_row['data_creazione']}")
                     c1.caption(f"Fisio: {pdf_row['fisioterapista'] if pdf_row['fisioterapista'] else 'N/D'}")
                     c2.write(f"📄 {pdf_row['nome_file']}")
-                    full_path = os.path.join(PDF_DIR, os.path.basename(str(pdf_row['path_file'] or "")))
-                    if os.path.exists(full_path):
-                        with open(full_path, "rb") as f: c3.download_button("⬇️ Scarica", f, file_name=pdf_row['nome_file'], key=f"dl_{pdf_row['id']}")
-                    else: c3.error("Perso")
+                    pf = str(pdf_row['path_file'] or "")
+                    if pf.startswith("http"):
+                        try:
+                            import urllib.request
+                            pdf_data = urllib.request.urlopen(pf).read()
+                            c3.download_button("⬇️ Scarica", pdf_data, file_name=pdf_row['nome_file'], mime="application/pdf", key=f"dl_{pdf_row['id']}")
+                        except Exception:
+                            c3.error("Errore download")
+                    else:
+                        full_path = os.path.join(PDF_DIR, os.path.basename(pf))
+                        if os.path.exists(full_path):
+                            with open(full_path, "rb") as f: c3.download_button("⬇️ Scarica", f, file_name=pdf_row['nome_file'], key=f"dl_{pdf_row['id']}")
+                        else: c3.error("Perso")
                     st.divider()
         else: st.write("Nessun report in archivio.")
 
