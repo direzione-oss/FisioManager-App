@@ -213,7 +213,9 @@ def genera_pdf_fisico(paziente, esercizi_df, data_report, nome_fisio):
         start_y = pdf.get_y()
         
         # --- GESTIONE FOTO (supporta file locali e URL Supabase) ---
-        path_db = row.get('foto_path') or ''
+        path_db = row.get('foto_path', '')
+        if not isinstance(path_db, str):
+            path_db = ''
         img_source = None
         
         # 1. Prova file locale

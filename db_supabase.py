@@ -220,12 +220,17 @@ def upload_pdf(nome_file: str, file_bytes: bytes) -> str:
     return url
 
 
-def get_foto_url(foto_path: str) -> Optional[str]:
+def get_foto_url(foto_path) -> Optional[str]:
     """
     Dato il valore foto_path salvato nel DB, restituisce un URL utilizzabile.
     Compatibile sia con i vecchi path locali (ignorati) che con gli URL Supabase.
     """
-    if not foto_path or not isinstance(foto_path, str):
+    if foto_path is None or not isinstance(foto_path, str):
+        return None
+    if pd.isna(foto_path):
+        return None
+    foto_path = foto_path.strip()
+    if not foto_path:
         return None
     if foto_path.startswith("http"):
         return foto_path
