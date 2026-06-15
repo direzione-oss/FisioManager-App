@@ -665,29 +665,36 @@ elif scelta == "🏋️ Catalogo Esercizi":
                     st.markdown("**📸 Scatta / Carica foto:**")
                     nuova_foto = st.file_uploader("Scegli o scatta foto", type=['jpg', 'png', 'jpeg'], key=f"foto_upload_{es_id}", label_visibility="collapsed")
                     if nuova_foto:
-                        if st.button("✅ Usa questa foto", key=f"use_foto_{es_id}", type="primary"):
-                            new_url = upload_foto(es_data['nome'], nuova_foto.getvalue())
-                            update("esercizi", {"foto_path": new_url}, "id", es_id)
-                            _log("Foto Caricata", f"Esercizio ID: {es_id}")
-                            st.success("Foto aggiornata!")
-                            st.rerun()
+                        key_upload_photo = f"uploaded_photo_{es_id}_{nuova_foto.name}_{nuova_foto.size}"
+                        if key_upload_photo not in st.session_state:
+                            st.session_state[key_upload_photo] = True
+                            with st.spinner("Caricamento foto in corso..."):
+                                new_url = upload_foto(es_data['nome'], nuova_foto.getvalue())
+                                update("esercizi", {"foto_path": new_url}, "id", es_id)
+                                _log("Foto Caricata", f"Esercizio ID: {es_id}")
+                                st.success("Foto aggiornata!")
+                                st.rerun()
                     # Upload video
                     st.markdown("**🎬 Registra / Carica video:**")
                     nuovo_video = st.file_uploader("Scegli o registra video", type=['mp4', 'mov', 'avi'], key=f"video_upload_{es_id}", label_visibility="collapsed")
                     if nuovo_video:
-                        if st.button("✅ Carica video", key=f"use_video_{es_id}", type="primary"):
-                            video_filename = f"{es_data['nome'].replace(' ', '_')}_{es_id}.mp4"
-                            sb = get_supabase()
-                            sb.storage.from_("foto-esercizi").upload(
-                                f"video/{video_filename}",
-                                nuovo_video.getvalue(),
-                                {"content-type": nuovo_video.type, "upsert": "true"}
-                            )
-                            video_public_url = sb.storage.from_("foto-esercizi").get_public_url(f"video/{video_filename}")
-                            update("esercizi", {"video_url": video_public_url}, "id", es_id)
-                            _log("Video Caricato", f"Esercizio ID: {es_id}")
-                            st.success("Video caricato e QR code aggiornato!")
-                            st.rerun()
+                        key_upload_video = f"uploaded_video_{es_id}_{nuovo_video.name}_{nuovo_video.size}"
+                        if key_upload_video not in st.session_state:
+                            st.session_state[key_upload_video] = True
+                            with st.spinner("Caricamento video in corso..."):
+                                video_filename = f"{es_data['nome'].replace(' ', '_')}_{es_id}.mp4"
+                                sb = get_supabase()
+                                sb.storage.from_("foto-esercizi").upload(
+                                    f"video/{video_filename}",
+                                    nuovo_video.getvalue(),
+                                    {"content-type": nuovo_video.type, "upsert": "true"}
+                                )
+                                video_public_url = sb.storage.from_("foto-esercizi").get_public_url(f"video/{video_filename}")
+                                update("esercizi", {"video_url": video_public_url}, "id", es_id)
+                                _log("Video Caricato", f"Esercizio ID: {es_id}")
+                                st.success("Video caricato e QR code aggiornato!")
+                                st.rerun()
+                    st.divider()
                 with st.form("edit_es_form"):
                     e_nome = st.text_input("Nome", es_data['nome'])
                     try: d_idx = lista_distretti.index(es_data['distretto'])

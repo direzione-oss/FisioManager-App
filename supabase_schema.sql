@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS esercizi (
     serie_std TEXT,
     rip_std TEXT,
     recupero TEXT,
-    tipo TEXT
+    tipo TEXT,
+    video_url TEXT
 );
 
 -- 3. PAZIENTI
