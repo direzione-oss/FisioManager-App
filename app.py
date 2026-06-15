@@ -669,7 +669,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                         if key_upload_photo not in st.session_state:
                             st.session_state[key_upload_photo] = True
                             with st.spinner("Caricamento foto in corso..."):
-                                new_url = upload_foto(es_data['nome'], nuova_foto.getvalue())
+                                new_url = upload_foto(es_data['nome'], nuova_foto.getvalue(), vecchio_foto_path=es_data.get('foto_path'))
                                 update("esercizi", {"foto_path": new_url}, "id", es_id)
                                 _log("Foto Caricata", f"Esercizio ID: {es_id}")
                                 st.success("Foto aggiornata!")
@@ -710,7 +710,7 @@ elif scelta == "🏋️ Catalogo Esercizi":
                     if st.form_submit_button("💾 Salva Modifiche"):
                         new_url = es_data['foto_path']
                         if e_foto:
-                            new_url = upload_foto(e_nome, e_foto.getvalue())
+                            new_url = upload_foto(e_nome, e_foto.getvalue(), vecchio_foto_path=es_data.get('foto_path'))
                         update("esercizi", {"nome": e_nome, "distretto": e_dist, "descrizione": e_desc, "serie_std": e_s, "rip_std": e_r, "recupero": e_rec, "foto_path": new_url, "video_url": e_video or None}, "id", es_id)
                         _log("Modifica Esercizio", f"ID: {es_id}")
                         st.session_state.edit_esercizio_id = None

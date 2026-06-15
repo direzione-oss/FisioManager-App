@@ -177,17 +177,31 @@ def get_report_esercizi(paziente_id: int) -> pd.DataFrame:
 BUCKET = "foto-esercizi"
 
 
-def upload_foto(nome_esercizio: str, file_bytes: bytes, mime: str = "image/jpeg") -> str:
+def upload_foto(nome_esercizio: str, file_bytes: bytes, vecchio_foto_path: str = None, mime: str = "image/jpeg") -> str:
     """
-    Carica la foto su Supabase Storage.
-    Restituisce l'URL pubblico da salvare nel DB.
+    Carica la foto su Supabase Storage con un nome univoco (per evitare caching del browser).
+    Elimina la vecchia foto se specificata e restituisce l'URL pubblico.
     """
+    import time
+    from urllib.parse import unquote
+    
     sb = get_supabase()
-    filename = f"{nome_esercizio.replace(' ', '_')}.jpg"
-    try:
-        sb.storage.from_(BUCKET).remove([filename])
-    except Exception:
-        pass
+    
+    # 1. Elimina la vecchia foto se presente nel bucket per non lasciare file orfani
+    if vecchio_foto_path and isinstance(vecchio_foto_path, str) and vecchio_foto_path.startswith("http"):
+        try:
+            vecchio_filename = vecchio_foto_path.split("/")[-1]
+            vecchio_filename = unquote(vecchio_filename)
+            if vecchio_filename:
+                sb.storage.from_(BUCKET).remove([vecchio_filename])
+        except Exception:
+            pass
+            
+    # 2. Crea un nome file univoco con timestamp
+    timestamp = int(time.time())
+    safe_name = nome_esercizio.replace(' ', '_').replace('/', '_')
+    filename = f"{safe_name}_{timestamp}.jpg"
+    
     sb.storage.from_(BUCKET).upload(
         filename,
         file_bytes,
